@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t vivdocker/react-test -f ./client/dockerfile.dev ./client
+
+script:
+  - docker run vivdocker/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t vivdocker/multi-client ./client
+  - docker build -t vivdocker/multi-nginx ./nginx
+  - docker build -t vivdocker/multi-server ./server
+  - docker build -t vivdocker/multi-worker ./worker 
+  - echo "$Docker_PASSWORD" | docker login -u "$Docker_ID" --password-stdin
+  - docker push vivdocker/multi-client
+  - docker push vivdocker/multi-nginx
+  - docker push vivdocker/multi-server
+  - docker push vivdocker/multi-worker
+
+
